@@ -70,42 +70,44 @@
        	        var cellText = document.createTextNode(getRandom);
                	cell.appendChild(cellText);
                	row.appendChild(cell);
-            }           
-
-	     
-		    // create cells in row
-    	    for (var c = 0; c < cellsInRow; c++) {
-    	        var cell = document.createElement("td");
-		getRandom = Math.floor(Math.random() * (max - min + 1)) + 	min;
-                var cellText = document.createTextNode(Math.floor(Math.random() * (max - min + 1)) + min);
-               	cell.appendChild(cellText);
-               	row.appendChild(cell);
-            }           
-        
+            }         
 		tbl.appendChild(row); // add the row to the end of the table body
 		tableRows++;
     	}
     
-        
-	tbl.appendChild(row); // add the row to the end of the table body
-    }
+    
     
     div1.appendChild(tbl); // appends <table> into <div1>
 }
 
-		tbl.appendChild(row);
-		div2.appendChild(tbl);
-		}
+function drawAverages(){
+	var div2 = document.getElementById('div2');
+
+	var tbl = document.createElement("table");
+
+	var row = document.createElement("tr");
+
+	for(var c = 0; c < cellsInRow; c++){
+		var cell = document.createElement("td");
+		var cellText = document.createTextNode(avgs[c]/tableRows);
+		cell.appendChild(cellText);
+		row.appendChild(cell);
+	}
+
+	tbl.appendChild(row);
+	div2.appendChild(tbl);
+}
+
 		function drawChart(){
 			var div3 = document.getElementById('div3');
 		}
 		function drawAll(){
-		this.drawTable();
-		this.drawAverages();
+			this.drawTable();
+			this.drawAverages();
 		}
-	window.onload=drawAll;
 
-window.onload=drawTable; 
+
+window.onload=drawAll; 
 </script>
 </body>
 </html>
