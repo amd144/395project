@@ -22,7 +22,7 @@
 	d3.text("2weekdata.csv", function(datasetText) {
 		var parsedCSV = d3.csv.parseRows(datasetText);
 		
-		var sampleHTML = d3.select("#div1")
+		var sampleHTML = d3.select("#viz")
 			.append("table")
 			.style("border-collapse", "collapse")
 			.style("border", "2px black solid")
