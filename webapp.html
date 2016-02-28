@@ -1,7 +1,7 @@
 <html>
 <head>
 	<title>Senior Project Web App</title>
-	<script type src="http://mbostock.github.com/d3/d3.js"></script>
+	<script type src="https://raw.githubusercontent.com/mbostock/d3/master/d3.js"></script>
 	<style>
 	#div1 {margin:10px;font-size:1.25em;}
 	table {border-collapse:collapse;border:1px solid #7f7f7f;}
@@ -13,13 +13,9 @@
 	<div id="div1"></div>
 	<div id="div2"></div>
 	<div id="div3"></div>
-	<script type = "text/javascript">
+	<script>
 	
-	d3.csv("https://raw.githubusercontent.com/dartonus/395project/master/2weekdata.csv", function(data) {
-		console.log(data[0]);	
-	});
-	
-	d3.text("https://raw.githubusercontent.com/dartonus/395project/master/2weekdata.csv", function(datasetText) {
+	d3.text("2weekdata.csv", function(datasetText) {
 		var parsedCSV = d3.csv.parseRows(datasetText);
 		
 		var sampleHTML = d3.select("#viz")
