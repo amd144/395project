@@ -15,11 +15,11 @@
 	<div id="div3"></div>
 	<script type = "text/javascript">
 	
-	d3.csv("/2weekdata.csv", function(data) {
+	d3.csv("https://github.com/dartonus/395project/blob/master/2weekdata.csv", function(data) {
 		console.log(data[0]);	
 	});
 	
-	d3.text("2weekdata.csv", function(datasetText) {
+	d3.text("https://github.com/dartonus/395project/blob/master/2weekdata.csv", function(datasetText) {
 		var parsedCSV = d3.csv.parseRows(datasetText);
 		
 		var sampleHTML = d3.select("#viz")
