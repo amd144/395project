@@ -15,28 +15,30 @@
 	<div id="div3"></div>
 	<script>
 	
-	d3.text("2weekdata.csv", function(datasetText) {
-		var parsedCSV = d3.csv.parseRows(datasetText);
+	function drawCSV(){
+		d3.text("week1monnoteless.csv", function(datasetText) {
+			var parsedCSV = d3.csv.parseRows(datasetText);
 		
-		var sampleHTML = d3.select("#viz")
-			.append("table")
-			.style("border-collapse", "collapse")
-			.style("border", "2px black solid")
+			var sampleHTML = d3.select("#viz")
+				.append("table")
+				.style("border-collapse", "collapse")
+				.style("border", "2px black solid")
 			
-			.selectAll("tr")
-			.data(parsedCSV)
-			.enter().append("tr")
+				.selectAll("tr")
+				.data(parsedCSV)
+				.enter().append("tr")
 			
-			.selectAll("td")
-			.data(function(d) {return d;})
-			.enter().append("td")
-			.style("border", "1px black solid")
-			.style("padding", "5px")
-			.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
-			.on("mouseover", function(){d3.select(this).style("background-color", "white")})
-			.text(function(d){return d;})
-			.style("font-size", "12px");
-	});
+				.selectAll("td")
+				.data(function(d) {return d;})
+				.enter().append("td")
+				.style("border", "1px black solid")
+				.style("padding", "5px")
+				.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
+				.on("mouseover", function(){d3.select(this).style("background-color", "white")})
+				.text(function(d){return d;})
+				.style("font-size", "12px");
+		});
+	}
 	
 	var totalRows = 5;
 	var cellsInRow = 5;
@@ -46,62 +48,59 @@
 	var tableRows = 0;
 
 
-
-	    function drawTable() {
- 	        // get the reference for the body
-    	    var div1 = document.getElementById('div1');
+	//Drawtable is used simply for testing for my other functions at the moment.
+	//Eventually, it will be removed and the average/graphing functions will be
+	//Hooked up to the csv-parsing table method.
+	function drawTable() {
+        // get the reference for the body
+   	    var div1 = document.getElementById('div1');
  
-    	    // creates a <table> element
-    	    var tbl = document.createElement("table");
+   	    // creates a <table> element
+   	    var tbl = document.createElement("table");
  
-    	    // creating rows
-    	    for (var r = 0; r < totalRows; r++) {
-    	        var row = document.createElement("tr");
+   	    // creating rows
+   	    for (var r = 0; r < totalRows; r++) {
+   	        var row = document.createElement("tr");
 	     
-	    // create cells in row
-    	    for (var c = 0; c < cellsInRow; c++) {
-    	        var cell = document.createElement("td");
-		var getRandom = Math.floor(Math.random() * (max - min + 1)) + 	min;
-		avgs[c] = avgs[c] + getRandom;
-       	        var cellText = document.createTextNode(getRandom);
-               	cell.appendChild(cellText);
-               	row.appendChild(cell);
-            }         
-		tbl.appendChild(row); // add the row to the end of the table body
-		tableRows++;
+		    // create cells in row
+   	    	for (var c = 0; c < cellsInRow; c++) {
+   	        	var cell = document.createElement("td");
+				var getRandom = Math.floor(Math.random() * (max - min + 1)) + 	min;
+				avgs[c] = avgs[c] + getRandom;
+       	    	var cellText = document.createTextNode(getRandom);
+           		cell.appendChild(cellText);
+           		row.appendChild(cell);
+        	}         
+			tbl.appendChild(row); // add the row to the end of the table body
+			tableRows++;
     	}
-    
-    
-    
-    div1.appendChild(tbl); // appends <table> into <div1>
-}
-
-function drawAverages(){
-	var div2 = document.getElementById('div2');
-
-	var tbl = document.createElement("table");
-
-	var row = document.createElement("tr");
-
-	for(var c = 0; c < cellsInRow; c++){
-		var cell = document.createElement("td");
-		var cellText = document.createTextNode(avgs[c]/tableRows);
-		cell.appendChild(cellText);
-		row.appendChild(cell);
+	    div1.appendChild(tbl); // appends <table> into <div1>
 	}
+	//Compiles the averages for each value. Simple stuff.
+	//This will be fed into the graphing function.
+	function drawAverages(){
+		var div2 = document.getElementById('div2');
+		var tbl = document.createElement("table");
+		var row = document.createElement("tr");
 
-	tbl.appendChild(row);
-	div2.appendChild(tbl);
-}
-
-		function drawChart(){
-			var div3 = document.getElementById('div3');
+		for(var c = 0; c < cellsInRow; c++){
+			var cell = document.createElement("td");
+			var cellText = document.createTextNode(avgs[c]/tableRows);
+			cell.appendChild(cellText);
+			row.appendChild(cell);
 		}
-		function drawAll(){
-			this.drawTable();
-			this.drawAverages();
-		}
-
+		tbl.appendChild(row);
+		div2.appendChild(tbl);
+	}
+	//Graphing function. Currently nonfunctional. Will eventually draw a line plot.
+	function drawChart(){
+		var div3 = document.getElementById('div3');
+	}
+	function drawAll(){
+		this.drawTable();
+		this.drawAverages();
+		this.drawCSV();
+	}
 
 window.onload=drawAll; 
 </script>
