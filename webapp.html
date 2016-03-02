@@ -9,13 +9,18 @@
 	</style>
 </head>
 <body>
-	<div id="viz"></div>
 	<div id="div1"></div>
 	<div id="div2"></div>
 	<div id="div3"></div>
+	<div id="viz"></div>
 	<script>
 	
+	//Note: Currently CSV drawing via d3 is not functional on some browsers
+	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
+	//Thus, may need to eventually change lookup method.
+	//But, the CSV is for testing at the moment so this is not strictly necessary.
 	function drawCSV(){
+		//Using week1monnoteless instead of the full 2 weeks to avoid crashing firefox.
 		d3.text("week1monnoteless.csv", function(datasetText) {
 			var parsedCSV = d3.csv.parseRows(datasetText);
 		
