@@ -2,6 +2,7 @@
 <head>
 	<title>Senior Project Web App</title>
 	<script type src="https://raw.githubusercontent.com/mbostock/d3/master/d3.js"></script>
+	<script type="text/javascript" src="canvasjs.min.js"></script>
 	<style>
 	#div1 {margin:10px;font-size:1.25em;}
 	table {border-collapse:collapse;border:1px solid #7f7f7f;}
@@ -11,7 +12,7 @@
 <body>
 	<div id="div1"></div>
 	<div id="div2"></div>
-	<div id="div3"></div>
+	<div id="div3" style="height: 500px; width: 50%"></div>
 	<div id="viz"></div>
 	<script>
 	
@@ -97,13 +98,30 @@
 		tbl.appendChild(row);
 		div2.appendChild(tbl);
 	}
-	//Graphing function. Currently nonfunctional. Will eventually draw a line plot.
+	//Graphing function. Currently drawing a bar graph simply to verify successful installation of CanvasJS
 	function drawChart(){
-		var div3 = document.getElementById('div3');
+		//var div3 = document.getElementById('div3');
+		var chart = new CanvasJS.Chart("div3", {
+              data: [
+              {
+                  type: "column",
+                  dataPoints: [
+                  { x: 10, y: 10 },
+                  { x: 20, y: 15 },
+                  { x: 30, y: 25 },
+                  { x: 40, y: 30 },
+                  { x: 50, y: 28 }
+                  ]
+              }
+              ]
+          });
+ 
+          chart.render();
 	}
 	function drawAll(){
 		this.drawTable();
 		this.drawAverages();
+		this.drawChart();
 		this.drawCSV();
 	}
 
