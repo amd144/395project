@@ -1,0 +1,195 @@
+<html>
+<head>
+	<title>Senior Project Web App</title>
+	<script type src="https://raw.githubusercontent.com/mbostock/d3/master/d3.js"></script>
+	<script type="text/javascript" src="canvasjs.min.js"></script>
+	<style>
+	#div1 {margin:10px;font-size:1.25em;}
+	table {border-collapse:collapse;border:1px solid #7f7f7f;}
+	td {border:1px solid #7f7f7f;width:50px;height:50px;text-align:center;}
+	</style>
+</head>
+<body>
+	<div id="div1"></div>
+	<div id="div2"></div>
+	<div id="div3" style="height: 500px; width: 50%"></div>
+	<div id="viz"></div>
+	<script>
+	
+	//Note: Currently CSV drawing via d3 is not functional on some browsers
+	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
+	//Thus, may need to eventually change lookup method.
+	//But, the CSV is for testing at the moment so this is not strictly necessary.
+	//function drawCSV(){
+		//Using week1monnoteless instead of the full 2 weeks to avoid crashing firefox.
+	//	d3.text("week1monnoteless.csv", function(datasetText) {
+	//		var parsedCSV = d3.csv.parseRows(datasetText);
+		
+	//		var sampleHTML = d3.select("#viz")
+	//			.append("table")
+	//			.style("border-collapse", "collapse")
+	//			.style("border", "2px black solid")
+			
+	//			.selectAll("tr")
+	//			.data(parsedCSV)
+	//			.enter().append("tr")
+			
+	//			.selectAll("td")
+	//			.data(function(d) {return d;})
+	//			.enter().append("td")
+	//			.style("border", "1px black solid")
+	//			.style("padding", "5px")
+	//			.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
+	//			.on("mouseover", function(){d3.select(this).style("background-color", "white")})
+	//			.text(function(d){return d;})
+	//			.style("font-size", "12px");
+	//	});
+	//}
+
+	function drawSQL(){
+		if(window.XMLHttpRequest){
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange = function(){
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
+				document.getElementById("viz").innerHTML = xmlhttp.responseText;
+			}
+		};
+		xmlhttp.open("GET","getdata.php",true);
+		xmlhttp.send();
+	}
+	
+	var totalRows = 5;
+	var cellsInRow = 5;
+	var min = 1;
+	var max = 10;
+	var randArray = [[], [], [], [], []];
+	for(var r = 0; r < 5; r++){
+		for(var c = 0; c < 5; c++){
+			var randNum = Math.floor(Math.random() * (max - min + 1)) + min;
+			randArray[r].push(randNum);
+		}
+	}
+	var avgs = [0, 0, 0, 0, 0];
+	var tableRows = 0;
+
+
+	//Drawtable is used simply for testing for my other functions at the moment.
+	//Eventually, it will be removed and the average/graphing functions will be
+	//Hooked up to the csv-parsing table method. -CG
+	function drawTable() {
+        // get the reference for the body
+   	    var div1 = document.getElementById('div1');
+ 
+   	    // creates a <table> element
+   	    var tbl = document.createElement("table");
+ 
+   	    // creating rows
+   	    for (var r = 0; r < totalRows; r++) {
+   	        var row = document.createElement("tr");
+	     
+		    // create cells in row
+   	    	for (var c = 0; c < cellsInRow; c++) {
+   	        	var cell = document.createElement("td");
+				var getRandom = randArray[r][c];
+				avgs[c] = avgs[c] + getRandom;
+       	    	var cellText = document.createTextNode(getRandom);
+           		cell.appendChild(cellText);
+           		row.appendChild(cell);
+        	}         
+			tbl.appendChild(row); // add the row to the end of the table body
+			tableRows++;
+    	}
+	    div1.appendChild(tbl); // appends <table> into <div1>
+	}
+	//Compiles the averages for each value. Simple stuff.
+	//This will be fed into the graphing function. -CG
+	function drawAverages(){
+		var div2 = document.getElementById('div2');
+		var tbl = document.createElement("table");
+		var row = document.createElement("tr");
+
+		for(var c = 0; c < cellsInRow; c++){
+			var cell = document.createElement("td");
+			var cellText = document.createTextNode(avgs[c]/totalRows);
+			cell.appendChild(cellText);
+			row.appendChild(cell);
+		}
+		tbl.appendChild(row);
+		div2.appendChild(tbl);
+	}
+	//Graphing function. Currently draws a Line Graph hooked up to the webapp.
+	function drawChart(){
+		//Field of data charting each column of the data Array.
+		//I tried using randArray[r] directly as the dataPoints input, but this resulted in a vertical line at x-axis position 'r'. Using this as a workaround until I figure out a better solution over break. - CG
+		var datArray1 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray1.push({x: r, y: randArray[r][0]})
+		}
+		var datArray2 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray2.push({x: r, y: randArray[r][1]})
+		}
+		var datArray3 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray3.push({x: r, y: randArray[r][2]})
+		}
+		var datArray4 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray4.push({x: r, y: randArray[r][3]})
+		}
+		var datArray5 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray5.push({x: r, y: randArray[r][4]})
+		}
+		var chart = new CanvasJS.Chart("div3", {
+              data: [
+              {
+                  type: "line",
+                  name: "column 1",
+                  showInLegend: true,
+                  dataPoints: datArray1
+              },
+              {
+              	  type: "line",
+                  name: "column 2",
+                  showInLegend: true,
+              	  dataPoints: datArray2
+              },
+              {
+                  type: "line",
+                  name: "column 3",
+                  showInLegend: true,
+                  dataPoints: datArray3
+              },
+              {
+                  type: "line",
+                  name: "column 4",
+                  showInLegend: true,
+                  dataPoints: datArray4
+              },
+              {
+                  type: "line",
+                  name: "column 5",
+                  showInLegend: true,
+                  dataPoints: datArray5
+              }
+              ]
+          });
+ 
+          chart.render();
+	}
+	function drawAll(){
+		this.drawTable();
+		this.drawAverages();
+		this.drawChart();
+		//this.drawCSV();
+		this.drawSQL();
+	}
+
+window.onload=drawAll; 
+</script>
+</body>
+</html>
