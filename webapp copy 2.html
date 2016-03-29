@@ -193,7 +193,8 @@
 		for(var r = 0; r < totalRows; r++){
 			datArray5.push({x: r, y: randArray[r][4]})
 		}
-        
+
+
 		var chart = new CanvasJS.Chart("div3", {
             //Added a title to the data for both -AD
               title: {
@@ -235,62 +236,111 @@
           chart.render();
           
           
-          //I am going to use averages for the pie chart -AD
-          //Average 1
-          var sum1 = 0;
-          for( var i = 0; i < datArray1.length; i++ ){
-              sum1 += parseInt( datArray1[i], 10 );
-          }
-          var avg1 = sum1/datArray1.length;
-          //Average 2
-          var sum2 = 0;
-          for( var i = 0; i < datArray1.length; i++ ){
-              sum2 += parseInt( datArray1[i], 10 );
-          }
-          var avg2 = sum2/datArray2.length;
-          //Average 3
-          var sum3 = 0;
-          for( var i = 0; i < datArray3.length; i++ ){
-              sum3 += parseInt( datArray3[i], 10 );
-          }
-          var avg3 = sum3/datArray3.length;
-          //Average 4
-          var sum4 = 0;
-          for( var i = 0; i < datArray4.length; i++ ){
-              sum4 += parseInt( datArray4[i], 10 );
-          }
-          var avg4 = sum4/datArray4.length;
-          //Average 5
-          var sum5 = 0;
-          for( var i = 0; i < datArray5.length; i++ ){
-              sum5 += parseInt( datArray5[i], 10 );
-          }
-          var avg5 = sum5/datArray5.length;
 
 
           
-         //Similar to the previous chart, but now is a pie chart instead
-         //Don't know how to do both simultaneously.
-         //When both of these charts are activated at the same time, only the first chart appears and the table
-         //doesn't appear.
-         //Also used div4 instead of div3
-          //-AD
-         var chart2 = new CanvasJS.Chart("div4", {
-                
-                //New note: I think using a pie chart with this data is a bad idea, unless I use averages instead of data arrays. While a line graph can use multiple points, a pie chart has to use specific numbers instead.
-                
-                datapoints: [
-                {
-                       //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
-                       type: "pie",
-                       name: "column 1",
-                       showInLegend: true,
-                       data: avg1
-                }
-                ]
-            });
-            //Named it differently to differentiate the two charts. -AD
-           chart2.render();
+    }
+    
+    function pieChart() {
+        
+        var datArray1 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray1.push({x: r, y: randArray[r][0]})
+		}
+        
+		var datArray2 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray2.push({x: r, y: randArray[r][1]})
+		}
+		var datArray3 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray3.push({x: r, y: randArray[r][2]})
+		}
+		var datArray4 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray4.push({x: r, y: randArray[r][3]})
+		}
+		var datArray5 = []
+		for(var r = 0; r < totalRows; r++){
+			datArray5.push({x: r, y: randArray[r][4]})
+		}
+        
+        //I am going to use averages for the pie chart -AD
+        //Average 1
+        var sum1 = 0;
+        
+        for(key in datArray1){
+            sum1 += parseInt( datArray1[key], 10 );
+        }
+       // document.write(sum1);
+        var avg1 = sum1/datArray1.length;
+        //Average 2
+        var sum2 = 0;
+        for( var i = 0; i < datArray2.length; i++ ){
+            if(datArray2[i] != null) {
+                sum2 += parseInt( datArray2[i], 10 );
+            }
+        }
+        var avg2 = sum2/datArray2.length;
+        //Average 3
+        var sum3 = 0;
+        for( var i = 0; i < datArray3.length; i++ ){
+            if(datArray3[i] != null) {
+                sum3 += parseInt( datArray3[i], 10 );
+            }
+        }
+        var avg3 = sum3/datArray3.length;
+        //Average 4
+        var sum4 = 0;
+        for( var i = 0; i < datArray4.length; i++ ){
+            if(datArray4[i] != null) {
+                sum4 += parseInt( datArray4[i], 10 );
+            }
+        }
+        var avg4 = sum4/datArray4.length;
+        //Average 5
+        var sum5 = 0;
+        for( var i = 0; i < datArray5.length; i++ ){
+            if(datArray5[i] != null) {
+                sum5 += parseInt( datArray5[i], 10 );
+            }
+        }
+     //   document.write(sum5);
+        var avg5 = sum5/datArray5.length;
+        
+
+        //Similar to the previous chart, but now is a pie chart instead
+        //Even though the legend is available, the pie itself doesn't appear.
+        //The labels for each arc of the pie appear, though.
+        //Just found out that the problem is that the averages for some reason don't store values.
+        //Also used div4 instead of div3
+        //-AD
+        var chart2 = new CanvasJS.Chart("div4", {
+                                        legend: {
+                                        maxWidth: 350,
+                                        itemWidth: 120
+                                        },
+                                        
+                                        
+                                        data: [
+                                               {
+                                               //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
+                                               type: "pie",
+                                               showInLegend: true,
+                                               legendText: "{indexLabel}",
+                                               dataPoints: [
+                                                            { y: avg1, indexLabel: "arc1"},
+                                                            { y: avg2, indexLabel: "arc2"},
+                                                            { y: avg3, indexLabel: "arc3"},
+                                                            { y: avg4, indexLabel: "arc4"},
+                                                            { y: avg5, indexLabel: "arc5"}
+                                                            ]
+                                               }
+                                               ]
+                                        });
+                                        //Named it differently to differentiate the two charts. -AD
+                                        chart2.render();
+
     }
 
                        /*,
@@ -326,6 +376,7 @@
 		this.drawTable();
 		this.drawAverages();
 		this.drawChart();
+        this.pieChart();
 		this.drawCSV();
         this.type(d);
 	}
