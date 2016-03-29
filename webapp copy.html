@@ -176,6 +176,7 @@
 		for(var r = 0; r < totalRows; r++){
 			datArray1.push({x: r, y: randArray[r][0]})
 		}
+        
 		var datArray2 = []
 		for(var r = 0; r < totalRows; r++){
 			datArray2.push({x: r, y: randArray[r][1]})
@@ -192,7 +193,8 @@
 		for(var r = 0; r < totalRows; r++){
 			datArray5.push({x: r, y: randArray[r][4]})
 		}
-        
+
+
 		var chart = new CanvasJS.Chart("div3", {
             //Added a title to the data for both -AD
               title: {
@@ -232,58 +234,78 @@
               ]
           });
           chart.render();
-         //Similar to the previous chart, but now is a pie chart instead
-         //Don't know how to do both simultaneously.
-         //When both of these charts are activated at the same time, only the first chart appears and the table
-         //doesn't appear.
-         //Also used div4 instead of div3
-          //-AD
-         var chart2 = new CanvasJS.Chart("div4", {
-                
-                
-                data: [
-                {
-                       //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
-                       type: "pie",
-                       dataPoints: [
-                                    {label: "arc1", y: 10},
-                                    {label: "arc2", y: 10},
-                                    {label: "arc3", y: 10},
-                                    {label: "arc4", y: 10},
-                                    {label: "arc5", y: 10}
-                        ]
-                }
-                ]
-            });
-            //Named it differently to differentiate the two charts. -AD
-           chart2.render();
+          
+          
+
+
+          
+    }
+    
+    function pieChart() {
+        
+        //I am going to use averages for the pie chart -AD
+        var sum1 = 0;
+        for(var r = 0; r < totalRows; r++){
+			sum1 += parseInt(randArray[r][0], 10);
+		}
+        var avg1 = sum1/totalRows;
+        
+        var sum2 = 0;
+        for(var r = 0; r < totalRows; r++){
+			sum2 += parseInt(randArray[r][1], 10);
+		}
+        var avg2 = sum2/totalRows;
+
+        var sum3 = 0;
+        for(var r = 0; r < totalRows; r++){
+            sum3 += parseInt(randArray[r][2], 10);
+        }
+        var avg3 = sum1/totalRows;
+
+        var sum4 = 0;
+        for(var r = 0; r < totalRows; r++){
+            sum4 += parseInt(randArray[r][3], 10);
+        }
+        var avg4 = sum4/totalRows;
+        
+        var sum5 = 0;
+        for(var r = 0; r < totalRows; r++){
+			sum5 += parseInt(randArray[r][0], 10);
+		}
+        var avg5 = sum5/totalRows;
+     
+
+        //Similar to the previous chart, but now is a pie chart instead
+        //Also used div4 instead of div3
+        //-AD
+        var pieChart = new CanvasJS.Chart("div4", {
+                                        legend: {
+                                        maxWidth: 350,
+                                        itemWidth: 120
+                                        },
+                                        
+                                        
+                                        data: [
+                                               {
+                                               //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
+                                               type: "pie",
+                                               showInLegend: true,
+                                               legendText: "{indexLabel}",
+                                               dataPoints: [
+                                                            { y: avg1, indexLabel: "arc1"},
+                                                            { y: avg2, indexLabel: "arc2"},
+                                                            { y: avg3, indexLabel: "arc3"},
+                                                            { y: avg4, indexLabel: "arc4"},
+                                                            { y: avg5, indexLabel: "arc5"}
+                                                            ]
+                                               }
+                                               ]
+                                        });
+                                        //Named it differently to differentiate the two charts. -AD
+                                        pieChart.render();
+
     }
 
-                       /*,
-                {
-                        type: "pie",
-                        name: "column 2",
-                        showInLegend: true,
-                        dataPoints: datArray2
-                },
-                {
-                       type: "pie",
-                       name: "column 3",
-                       showInLegend: true,
-                       dataPoints: datArray3
-                },
-                {
-                       type: "pie",
-                       name: "column 4",
-                       showInLegend: true,
-                       dataPoints: datArray4
-                },
-                {
-                       type: "pie",
-                       name: "column 5",
-                       showInLegend: true,
-                       dataPoints: datArray5
-                }*/
             
 
 
@@ -292,6 +314,7 @@
 		this.drawTable();
 		this.drawAverages();
 		this.drawChart();
+        this.pieChart();
 		this.drawCSV();
         this.type(d);
 	}
