@@ -5,7 +5,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "Gigant7";
+$password = "";
 $dbname = "sensors";
 
 // Create connection

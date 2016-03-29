@@ -20,31 +20,31 @@
 	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
 	//Thus, may need to eventually change lookup method.
 	//But, the CSV is for testing at the moment so this is not strictly necessary.
-	//function drawCSV(){
+	function drawCSV(){
 		//Using week1monnoteless instead of the full 2 weeks to avoid crashing firefox.
-	//	d3.text("week1monnoteless.csv", function(datasetText) {
-	//		var parsedCSV = d3.csv.parseRows(datasetText);
+		d3.text("week1monnoteless.csv", function(datasetText) {
+			var parsedCSV = d3.csv.parseRows(datasetText);
 		
-	//		var sampleHTML = d3.select("#viz")
-	//			.append("table")
-	//			.style("border-collapse", "collapse")
-	//			.style("border", "2px black solid")
+			var sampleHTML = d3.select("#viz")
+				.append("table")
+				.style("border-collapse", "collapse")
+				.style("border", "2px black solid")
 			
-	//			.selectAll("tr")
-	//			.data(parsedCSV)
-	//			.enter().append("tr")
+				.selectAll("tr")
+				.data(parsedCSV)
+				.enter().append("tr")
 			
-	//			.selectAll("td")
-	//			.data(function(d) {return d;})
-	//			.enter().append("td")
-	//			.style("border", "1px black solid")
-	//			.style("padding", "5px")
-	//			.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
-	//			.on("mouseover", function(){d3.select(this).style("background-color", "white")})
-	//			.text(function(d){return d;})
-	//			.style("font-size", "12px");
-	//	});
-	//}
+				.selectAll("td")
+				.data(function(d) {return d;})
+				.enter().append("td")
+				.style("border", "1px black solid")
+				.style("padding", "5px")
+				.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
+				.on("mouseover", function(){d3.select(this).style("background-color", "white")})
+				.text(function(d){return d;})
+				.style("font-size", "12px");
+		});
+	}
 
 	function drawSQL(){
 		if(window.XMLHttpRequest){
