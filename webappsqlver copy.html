@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 	<title>Senior Project Web App</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 	<script type src="https://raw.githubusercontent.com/mbostock/d3/master/d3.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="canvasjs.min.js"></script>
 	<style>
 	#div1 {margin:10px;font-size:1.25em;}
@@ -18,23 +12,10 @@
 <body>
 	<div id="div1"></div>
 	<div id="div2"></div>
+	<div id="div3" style="height: 500px; width: 50%"></div>
 	<div id="viz"></div>
-    
-    <ul class=
-    <div class="containter">
-        <ul class="nav nav-tabs">
-           <li class="active"><a data-toggle="tab" href='#div3'>Line Graph</a></li>
-           <li><a data-toggle="tab" href="#div4">Pie Chart</a></li>
-        </ul>
-        
-        <div class="tab-content">
-            <div id="div3" class="tab-pane fade in active" style="height: 500px; width: 50%"></div>
-            <div id="div4" class="tab-pane fade" style="height: 500px; width: 50%"></div>
-        </div>
-    </div>
-    
-    <script>
-        
+	<script>
+	
 	//Note: Currently CSV drawing via d3 is not functional on some browsers
 	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
 	//Thus, may need to eventually change lookup method.
@@ -200,77 +181,10 @@
  
           chart.render();
 	}
-    
-    function pieChart() {
-        
-        //I am going to use averages for the pie chart -AD
-        var sum1 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum1 += parseInt(randArray[r][0], 10);
-		}
-        var avg1 = sum1/totalRows;
-        
-        var sum2 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum2 += parseInt(randArray[r][1], 10);
-		}
-        var avg2 = sum2/totalRows;
-        
-        var sum3 = 0;
-        for(var r = 0; r < totalRows; r++){
-            sum3 += parseInt(randArray[r][2], 10);
-        }
-        var avg3 = sum1/totalRows;
-        
-        var sum4 = 0;
-        for(var r = 0; r < totalRows; r++){
-            sum4 += parseInt(randArray[r][3], 10);
-        }
-        var avg4 = sum4/totalRows;
-        
-        var sum5 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum5 += parseInt(randArray[r][0], 10);
-		}
-        var avg5 = sum5/totalRows;
-        
-        
-        //Similar to the previous chart, but now is a pie chart instead
-        //Also used div4 instead of div3
-        //-AD
-        var pieChart = new CanvasJS.Chart("div4", {
-                                          legend: {
-                                          maxWidth: 350,
-                                          itemWidth: 120
-                                          },
-                                          
-                                          
-                                          data: [
-                                                 {
-                                                 //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
-                                                 type: "pie",
-                                                 showInLegend: true,
-                                                 legendText: "{indexLabel}",
-                                                 dataPoints: [
-                                                              { y: avg1, indexLabel: "arc1"},
-                                                              { y: avg2, indexLabel: "arc2"},
-                                                              { y: avg3, indexLabel: "arc3"},
-                                                              { y: avg4, indexLabel: "arc4"},
-                                                              { y: avg5, indexLabel: "arc5"}
-                                                              ]
-                                                 }
-                                                 ]
-                                          });
-                                          //Named it differently to differentiate the two charts. -AD
-                                          pieChart.render();
-                                          
-    }
-    
 	function drawAll(){
 		this.drawTable();
 		this.drawAverages();
 		this.drawChart();
-        this.pieChart();
 		//this.drawCSV();
 		this.drawSQL();
 	}
