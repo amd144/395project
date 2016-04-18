@@ -16,9 +16,6 @@
 	</style>
 </head>
 <body>
-	<div id="div1"></div>
-	<div id="div2"></div>
-	<div id="viz"></div>
     
     <ul class=
     <div class="containter">
@@ -31,11 +28,70 @@
             <div id="div3" class="tab-pane fade in active" style="height: 500px; width: 50%"></div>
             <div id="div4" class="tab-pane fade" style="height: 500px; width: 50%"></div>
         </div>
+        <div class="filter-boxes">
+        	<input class="filterCheckbox" type="checkbox" checked> Glennan
+        	<input class="filterCheckbox" type="checkbox" checked> Nord
+        	<input class="filterCheckbox" type="checkbox" checked> Olin 480
+        	<input class="filterCheckbox" type="checkbox" checked> Olin 208
+        	<input class="filterCheckbox" type="checkbox" checked> Rock 480
+        	<input class="filterCheckbox" type="checkbox" checked> Sears 480
+        	<input class="filterCheckbox" type="checkbox" checked> Sears 208
+        	<input class="filterCheckbox" type="checkbox" checked> Tomlinson
+        	<input class="filterCheckbox" type="checkbox" checked> White
+        	<input class="filterCheckbox" type="checkbox" checked> Wick 208
+        	<input class="filterCheckbox" type="checkbox" checked> Wick 480
+        	<input class="filterCheckbox" type="checkbox" checked> Yost
+        	<input class="filterCheckbox" type="checkbox" checked> Olin(Sum)
+        	<input class="filterCheckbox" type="checkbox" checked> Sears(Sum)
+        	<input class="filterCheckbox" type="checkbox" checked> Wick(Sum)
+        	<br>
+        	<button id="filter">Click Test</button>
+        </div>
     </div>
+
+	<div id="viz"></div>
+	<div id="div1"></div>
+	<div id="div2"></div>
     
     <script>
+
+    var lineChart;
+
+    var dateTimeArray = [];
+    var glennanArray= [];
+    var nordArray = [];
+    var olin480Array = [];
+    var olin208Array = [];
+    var rock480Array = [];
+    var sears480Array = [];
+    var sears208Array = [];
+    var tomlinsonArray = [];
+    var whiteArray = [];
+    var wick208Array = [];
+    var wick480Array = [];
+    var yostArray = [];
+    var olinSumArray = [];
+    var searsSumArray = [];
+    var wickSumArray = [];
+
+    var chartDatArray = [];
+    	var glennanLine = [];
+    	var nordLine = [];
+    	var olin480Line = [];
+    	var olin208Line = [];
+    	var rock480Line = [];
+    	var sears480Line = [];
+    	var sears208Line = [];
+    	var tomlinsonLine = [];
+    	var whiteLine = [];
+    	var wick208Line = [];
+    	var wick480Line = [];
+    	var yostLine = [];
+    	var olinSumLine = [];
+    	var searsSumLine = [];
+    	var wickSumLine = [];
         
-	//Note: Currently CSV drawing via d3 is not functional on some browsers
+	//Note: Currently CSV drawing via d3 does not appear to be functional on some browsers
 	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
 	//Thus, may need to eventually change lookup method.
 	//But, the CSV is for testing at the moment so this is not strictly necessary.
@@ -65,7 +121,7 @@
 		});
 	}
 
-	function drawSQL(){
+	function getSQL(){
 		if(window.XMLHttpRequest){
 			xmlhttp = new XMLHttpRequest();
 		} else {
@@ -73,11 +129,49 @@
 		}
 		xmlhttp.onreadystatechange = function(){
 			if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
-				document.getElementById("viz").innerHTML = xmlhttp.responseText;
+				var received = trimResponse(xmlhttp.responseText);
+				var obj = JSON.parse(received);
+				var resultArray = obj.sensordata;
+				parseResults(obj.sensordata);
 			}
 		};
-		xmlhttp.open("GET","getdata.php",true);
+		xmlhttp.open("GET","getdata2.php",true);
 		xmlhttp.send();
+	}
+
+	//When received, the php data from the table is surrounded with HTML tags, which will screw up the parsing.
+	//This is a helper function to strip those tags, leaving us with our desired JSON object.
+	function trimResponse(responseString){
+		var trimmed = responseString.replace("<!DOCTYPE html>", '');
+		trimmed = trimmed.replace("<html>", '');
+		trimmed = trimmed.replace("<body>", '');
+		trimmed = trimmed.replace("</body>", '');
+		trimmed = trimmed.replace("</html>", '');
+		return trimmed
+	}
+
+	//This helper function puts the data from the parsed JSON table into the arrays we have set up to store them.
+	function parseResults(resultArray){
+		for(var i = 0; i < resultArray.length; i++){
+			dateTimeArray.push(resultArray[i].Date_Time);
+			glennanArray.push(parseInt(resultArray[i].Glennan));
+			nordArray.push(parseInt(resultArray[i].Nord));
+			olin480Array.push(parseInt(resultArray[i].Olin_480));
+			olin208Array.push(parseInt(resultArray[i].Olin_208));
+			rock480Array.push(parseInt(resultArray[i].Rock_480));
+			sears480Array.push(parseInt(resultArray[i].Sears_480));
+			sears208Array.push(parseInt(resultArray[i].Sears_208));
+			tomlinsonArray.push(parseInt(resultArray[i].Tomlinson));
+			whiteArray.push(parseInt(resultArray[i].White));
+			wick208Array.push(parseInt(resultArray[i].Wick_208));
+			wick480Array.push(parseInt(resultArray[i].Wick_480));
+			yostArray.push(parseInt(resultArray[i].Yost));
+			olinSumArray.push(parseInt(resultArray[i].Olin_Sum));
+			searsSumArray.push(parseInt(resultArray[i].Sears_Sum));
+			wickSumArray.push(parseInt(resultArray[i].Wick_Sum));
+		}
+
+		this.drawChart();	//now that the JSON data has been parsed, the arrays are populated and we can run our Chart setup.
 	}
 	
 	var totalRows = 5;
@@ -139,66 +233,112 @@
 		tbl.appendChild(row);
 		div2.appendChild(tbl);
 	}
+
 	//Graphing function. Currently draws a Line Graph hooked up to the webapp.
 	function drawChart(){
-		//Field of data charting each column of the data Array.
-		//I tried using randArray[r] directly as the dataPoints input, but this resulted in a vertical line at x-axis position 'r'. Using this as a workaround until I figure out a better solution over break. - CG
-		var datArray1 = []
-		for(var r = 0; r < totalRows; r++){
-			datArray1.push({x: r, y: randArray[r][0]})
-		}
-		var datArray2 = []
-		for(var r = 0; r < totalRows; r++){
-			datArray2.push({x: r, y: randArray[r][1]})
-		}
-		var datArray3 = []
-		for(var r = 0; r < totalRows; r++){
-			datArray3.push({x: r, y: randArray[r][2]})
-		}
-		var datArray4 = []
-		for(var r = 0; r < totalRows; r++){
-			datArray4.push({x: r, y: randArray[r][3]})
-		}
-		var datArray5 = []
-		for(var r = 0; r < totalRows; r++){
-			datArray5.push({x: r, y: randArray[r][4]})
-		}
-		var chart = new CanvasJS.Chart("div3", {
-              data: [
-              {
-                  type: "line",
-                  name: "column 1",
-                  showInLegend: true,
-                  dataPoints: datArray1
-              },
-              {
-              	  type: "line",
-                  name: "column 2",
-                  showInLegend: true,
-              	  dataPoints: datArray2
-              },
-              {
-                  type: "line",
-                  name: "column 3",
-                  showInLegend: true,
-                  dataPoints: datArray3
-              },
-              {
-                  type: "line",
-                  name: "column 4",
-                  showInLegend: true,
-                  dataPoints: datArray4
-              },
-              {
-                  type: "line",
-                  name: "column 5",
-                  showInLegend: true,
-                  dataPoints: datArray5
-              }
-              ]
-          });
+		initializeLineData()
+
+		lineChart = new CanvasJS.Chart("div3", {
+              data: chartDatArray
+        });
  
-          chart.render();
+        lineChart.render();
+
+        //Helper Function for filtering of data: on button press, will change the chart's data array to only include
+        //Selected data sets.
+        $("#filter").click(function() {
+        	while(chartDatArray.length > 0){
+        		chartDatArray.shift();
+        	}
+        	var filters = document.getElementsByClassName('filterCheckbox');	
+    		if(filters[0].checked){
+    			chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
+    		}
+    		if(filters[1].checked){
+    			chartDatArray.push({type:"line",name:"Nord",showInLegend:true,dataPoints:nordLine})
+    		}
+    		if(filters[2].checked){
+				chartDatArray.push({type:"line",name:"Olin 480",showInLegend:true,dataPoints:olin480Line})
+			}
+			if(filters[3].checked){
+				chartDatArray.push({type:"line",name:"Olin 208",showInLegend:true,dataPoints:olin208Line})
+			}
+			if(filters[4].checked){
+				chartDatArray.push({type:"line",name:"Rock 480",showInLegend:true,dataPoints:rock480Line})
+			}
+			if(filters[5].checked){
+				chartDatArray.push({type:"line",name:"Sears 480",showInLegend:true,dataPoints:sears480Line})
+			}
+			if(filters[6].checked){
+				chartDatArray.push({type:"line",name:"Sears 208",showInLegend:true,dataPoints:sears208Line})
+			}
+			if(filters[7].checked){
+				chartDatArray.push({type:"line",name:"Tomlinson",showInLegend:true,dataPoints:tomlinsonLine})
+			}
+			if(filters[8].checked){
+				chartDatArray.push({type:"line",name:"White",showInLegend:true,dataPoints:whiteLine})
+			}
+			if(filters[9].checked){
+				chartDatArray.push({type:"line",name:"Wick 208",showInLegend:true,dataPoints:wick208Line})
+			}
+			if(filters[10].checked){
+				chartDatArray.push({type:"line",name:"Wick 480",showInLegend:true,dataPoints:wick480Line})
+			}
+			if(filters[11].checked){
+				chartDatArray.push({type:"line",name:"Yost",showInLegend:true,dataPoints:yostLine})
+			}
+			if(filters[12].checked){
+				chartDatArray.push({type:"line",name:"Olin (Sum)",showInLegend:true,dataPoints:olinSumLine})
+			}
+			if(filters[13].checked){
+				chartDatArray.push({type:"line",name:"Sears (Sum)",showInLegend:true,dataPoints:searsSumLine})
+			}
+			if(filters[14].checked){
+				chartDatArray.push({type:"line",name:"Wick (Sum)",showInLegend:true,dataPoints:wickSumLine})
+			}
+    		lineChart.render();
+        })
+	}
+
+	//Populate the line data for our line plot.
+	function initializeLineData(){
+		console.log("test");
+		for(var i = 0; i < 5; i++){
+			console.log("test")
+		}
+		console.log(dateTimeArray.length)
+		for(var r = 0; r < dateTimeArray.length; r++){
+			glennanLine.push({y: glennanArray[r], label: dateTimeArray[r]})
+			nordLine.push({y: nordArray[r], label: dateTimeArray[r]})
+			olin480Line.push({y: olin480Array[r], label: dateTimeArray[r]})
+			olin208Line.push({y: olin208Array[r], label: dateTimeArray[r]})
+			rock480Line.push({y: rock480Array[r], label: dateTimeArray[r]})
+			sears480Line.push({y: sears480Array[r], label: dateTimeArray[r]})
+			sears208Line.push({y: sears208Array[r], label: dateTimeArray[r]})
+			tomlinsonLine.push({y: tomlinsonArray[r], label: dateTimeArray[r]})
+			whiteLine.push({y: whiteArray[r], label: dateTimeArray[r]})
+			wick208Line.push({y: wick208Array[r], label: dateTimeArray[r]})
+			wick480Line.push({y: wick480Array[r], label: dateTimeArray[r]})
+			yostLine.push({y: yostArray[r], label: dateTimeArray[r]})
+			olinSumLine.push({y: olinSumArray[r], label: dateTimeArray[r]})
+			searsSumLine.push({y: searsSumArray[r], label: dateTimeArray[r]})
+			wickSumLine.push({y: wickSumArray[r], label: dateTimeArray[r]})
+		}
+		chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
+		chartDatArray.push({type:"line",name:"Nord",showInLegend:true,dataPoints:nordLine})
+		chartDatArray.push({type:"line",name:"Olin 480",showInLegend:true,dataPoints:olin480Line})
+		chartDatArray.push({type:"line",name:"Olin 208",showInLegend:true,dataPoints:olin208Line})
+		chartDatArray.push({type:"line",name:"Rock 480",showInLegend:true,dataPoints:rock480Line})
+		chartDatArray.push({type:"line",name:"Sears 480",showInLegend:true,dataPoints:sears480Line})
+		chartDatArray.push({type:"line",name:"Sears 208",showInLegend:true,dataPoints:sears208Line})
+		chartDatArray.push({type:"line",name:"Tomlinson",showInLegend:true,dataPoints:tomlinsonLine})
+		chartDatArray.push({type:"line",name:"White",showInLegend:true,dataPoints:whiteLine})
+		chartDatArray.push({type:"line",name:"Wick 208",showInLegend:true,dataPoints:wick208Line})
+		chartDatArray.push({type:"line",name:"Wick 480",showInLegend:true,dataPoints:wick480Line})
+		chartDatArray.push({type:"line",name:"Yost",showInLegend:true,dataPoints:yostLine})
+		chartDatArray.push({type:"line",name:"Olin (Sum)",showInLegend:true,dataPoints:olinSumLine})
+		chartDatArray.push({type:"line",name:"Sears (Sum)",showInLegend:true,dataPoints:searsSumLine})
+		chartDatArray.push({type:"line",name:"Wick (Sum)",showInLegend:true,dataPoints:wickSumLine})
 	}
     
     function pieChart() {
@@ -267,12 +407,12 @@
     }
     
 	function drawAll(){
+		this.getSQL();
 		this.drawTable();
 		this.drawAverages();
-		this.drawChart();
+		//this.drawChart();
         this.pieChart();
 		//this.drawCSV();
-		this.drawSQL();
 	}
 
 window.onload=drawAll; 
