@@ -22,11 +22,13 @@
         <ul class="nav nav-tabs">
            <li class="active"><a data-toggle="tab" href='#div3'>Line Graph</a></li>
            <li><a data-toggle="tab" href="#div4">Pie Chart</a></li>
+           <li><a data-toggle="tab" href="#div5">Column Graph</a></i>
         </ul>
         
         <div class="tab-content">
             <div id="div3" class="tab-pane fade in active" style="height: 500px; width: 50%"></div>
             <div id="div4" class="tab-pane fade" style="height: 500px; width: 50%"></div>
+            <div id="div5" class="tab-pane fade" style="height: 500px; width: 50%"></div>
         </div>
         <div class="filter-boxes">
         	<input class="filterCheckbox" type="checkbox" checked> Glennan
@@ -45,7 +47,7 @@
         	<input class="filterCheckbox" type="checkbox" checked> Sears(Sum)
         	<input class="filterCheckbox" type="checkbox" checked> Wick(Sum)
         	<br>
-        	<button id="filter">Click Test</button>
+        	<button id="filter" onclick="filterGraphData()">Filter Results</button>
         </div>
     </div>
 
@@ -56,6 +58,8 @@
     <script>
 
     var lineChart;
+    var pieChart;
+    var columnGraph;
 
     var dateTimeArray = [];
     var glennanArray= [];
@@ -90,6 +94,25 @@
     	var olinSumLine = [];
     	var searsSumLine = [];
     	var wickSumLine = [];
+
+    var chartAvgArray = [];
+    	var glennanAvg = 0;
+    	var nordAvg = 0;
+    	var olin480Avg = 0;
+    	var olin208Avg = 0;
+    	var rock480Avg = 0;
+    	var sears480Avg = 0;
+    	var sears208Avg = 0;
+    	var tomlinsonAvg = 0;
+    	var whiteAvg = 0;
+    	var wick208Avg = 0;
+    	var wick480Avg = 0;
+    	var yostAvg = 0;
+    	var olinSumAvg = 0;
+    	var searsSumAvg = 0;
+    	var wickSumAvg = 0;
+
+    var chartCurrentArray = [];
         
 	//Note: Currently CSV drawing via d3 does not appear to be functional on some browsers
 	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
@@ -121,6 +144,102 @@
 		});
 	}
 
+	function filterGraphData(){
+		//blah
+		while(chartDatArray.length > 0){
+        	chartDatArray.shift();
+        }
+        while(chartAvgArray.length > 0){
+        	chartAvgArray.shift();
+        }
+        while(chartCurrentArray.length > 0){
+        	chartCurrentArray.shift();
+        }
+
+    	var lastIndex = dateTimeArray.length - 1;
+
+        var filters = document.getElementsByClassName('filterCheckbox');	
+    	if(filters[0].checked){
+    		chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
+    		chartAvgArray.push({ y: glennanAvg, indexLabel: "Glennan"})
+	    	chartCurrentArray.push({ y: glennanArray[lastIndex], indexLabel: "Glennan"})
+    	}
+    	if(filters[1].checked){
+    		chartDatArray.push({type:"line",name:"Nord",showInLegend:true,dataPoints:nordLine})
+			chartAvgArray.push({ y: nordAvg, indexLabel: "Nord"})
+	    	chartCurrentArray.push({ y: nordArray[lastIndex], indexLabel: "Nord"})
+    	}
+    	if(filters[2].checked){
+			chartDatArray.push({type:"line",name:"Olin 480",showInLegend:true,dataPoints:olin480Line})
+			chartAvgArray.push({ y: olin480Avg, indexLabel: "Olin 480"})
+	    	chartCurrentArray.push({ y: olin480Array[lastIndex], indexLabel: "Olin 480"})
+		}
+		if(filters[3].checked){
+			chartDatArray.push({type:"line",name:"Olin 208",showInLegend:true,dataPoints:olin208Line})
+			chartAvgArray.push({ y: olin208Avg, indexLabel: "Olin 208"})
+	    	chartCurrentArray.push({ y: olin208Array[lastIndex], indexLabel: "Olin 208"})
+		}
+		if(filters[4].checked){
+			chartDatArray.push({type:"line",name:"Rock 480",showInLegend:true,dataPoints:rock480Line})
+			chartAvgArray.push({ y: rock480Avg, indexLabel: "Rock 480"})
+	    	chartCurrentArray.push({ y: rock480Array[lastIndex], indexLabel: "Rock 480"})
+		}
+		if(filters[5].checked){
+			chartDatArray.push({type:"line",name:"Sears 480",showInLegend:true,dataPoints:sears480Line})
+			chartAvgArray.push({ y: sears480Avg, indexLabel: "Sears 480"})
+	    	chartCurrentArray.push({ y: sears480Array[lastIndex], indexLabel: "Sears 480"})
+		}
+		if(filters[6].checked){
+			chartDatArray.push({type:"line",name:"Sears 208",showInLegend:true,dataPoints:sears208Line})
+			chartAvgArray.push({ y: sears208Avg, indexLabel: "Sears 208"})
+	    	chartCurrentArray.push({ y: sears208Array[lastIndex], indexLabel: "Sears 208"})
+		}
+		if(filters[7].checked){
+			chartDatArray.push({type:"line",name:"Tomlinson",showInLegend:true,dataPoints:tomlinsonLine})
+			chartAvgArray.push({ y: tomlinsonAvg, indexLabel: "Tomlinson"})
+	    	chartCurrentArray.push({ y: tomlinsonArray[lastIndex], indexLabel: "Tomlinson"})
+		}
+		if(filters[8].checked){
+			chartDatArray.push({type:"line",name:"White",showInLegend:true,dataPoints:whiteLine})
+			chartAvgArray.push({ y: whiteAvg, indexLabel: "White"})
+	    	chartCurrentArray.push({ y: whiteArray[lastIndex], indexLabel: "White"})
+		}
+		if(filters[9].checked){
+			chartDatArray.push({type:"line",name:"Wick 208",showInLegend:true,dataPoints:wick208Line})
+			chartAvgArray.push({ y: wick208Avg, indexLabel: "Wick 208"})
+	    	chartCurrentArray.push({ y: wick208Array[lastIndex], indexLabel: "Wick 208"})
+		}
+		if(filters[10].checked){
+			chartDatArray.push({type:"line",name:"Wick 480",showInLegend:true,dataPoints:wick480Line})
+			chartAvgArray.push({ y: wick480Avg, indexLabel: "Wick 480"})
+	    	chartCurrentArray.push({ y: wick480Array[lastIndex], indexLabel: "Wick 480"})
+		}
+		if(filters[11].checked){
+			chartDatArray.push({type:"line",name:"Yost",showInLegend:true,dataPoints:yostLine})
+			chartAvgArray.push({ y: yostAvg, indexLabel: "Yost"})
+	    	chartCurrentArray.push({ y: yostArray[lastIndex], indexLabel: "Yost"})
+		}
+		if(filters[12].checked){
+			chartDatArray.push({type:"line",name:"Olin (Sum)",showInLegend:true,dataPoints:olinSumLine})
+			chartAvgArray.push({ y: olinSumAvg, indexLabel: "Olin (Sum)"})
+	    	chartCurrentArray.push({ y: olinSumArray[lastIndex], indexLabel: "Olin (Sum)"})
+		}
+		if(filters[13].checked){
+			chartDatArray.push({type:"line",name:"Sears (Sum)",showInLegend:true,dataPoints:searsSumLine})
+			chartAvgArray.push({ y: searsSumAvg, indexLabel: "Sears (Sum)"})
+	    	chartCurrentArray.push({ y: searsSumArray[lastIndex], indexLabel: "Sears (Sum)"})
+		}
+		if(filters[14].checked){
+			chartDatArray.push({type:"line",name:"Wick (Sum)",showInLegend:true,dataPoints:wickSumLine})
+			chartAvgArray.push({ y: wickSumAvg, indexLabel: "Wick (Sum)"})
+	    	chartCurrentArray.push({ y: wickSumArray[lastIndex], indexLabel: "Wick (Sum)"})
+		}
+    	lineChart.render();
+    	pieChart.render();
+    	columnGraph.render();
+
+	}
+
 	function getSQL(){
 		if(window.XMLHttpRequest){
 			xmlhttp = new XMLHttpRequest();
@@ -135,7 +254,7 @@
 				parseResults(obj.sensordata);
 			}
 		};
-		xmlhttp.open("GET","getdata2.php",true);
+		xmlhttp.open("GET","getdata.php",true);
 		xmlhttp.send();
 	}
 
@@ -172,66 +291,17 @@
 		}
 
 		this.drawChart();	//now that the JSON data has been parsed, the arrays are populated and we can run our Chart setup.
+		this.pieChart();
+		this.columnGraph();
 	}
-	
-	var totalRows = 5;
-	var cellsInRow = 5;
-	var min = 1;
-	var max = 10;
-	var randArray = [[], [], [], [], []];
-	for(var r = 0; r < 5; r++){
-		for(var c = 0; c < 5; c++){
-			var randNum = Math.floor(Math.random() * (max - min + 1)) + min;
-			randArray[r].push(randNum);
+
+	function getAverage(intArray){
+		var sum = 0;
+		for(var i = 0; i < intArray.length; i++){
+			sum += intArray[i];
 		}
-	}
-	var avgs = [0, 0, 0, 0, 0];
-	var tableRows = 0;
-
-
-	//Drawtable is used simply for testing for my other functions at the moment.
-	//Eventually, it will be removed and the average/graphing functions will be
-	//Hooked up to the csv-parsing table method. -CG
-	function drawTable() {
-        // get the reference for the body
-   	    var div1 = document.getElementById('div1');
- 
-   	    // creates a <table> element
-   	    var tbl = document.createElement("table");
- 
-   	    // creating rows
-   	    for (var r = 0; r < totalRows; r++) {
-   	        var row = document.createElement("tr");
-	     
-		    // create cells in row
-   	    	for (var c = 0; c < cellsInRow; c++) {
-   	        	var cell = document.createElement("td");
-				var getRandom = randArray[r][c];
-				avgs[c] = avgs[c] + getRandom;
-       	    	var cellText = document.createTextNode(getRandom);
-           		cell.appendChild(cellText);
-           		row.appendChild(cell);
-        	}         
-			tbl.appendChild(row); // add the row to the end of the table body
-			tableRows++;
-    	}
-	    div1.appendChild(tbl); // appends <table> into <div1>
-	}
-	//Compiles the averages for each value. Simple stuff.
-	//This will be fed into the graphing function. -CG
-	function drawAverages(){
-		var div2 = document.getElementById('div2');
-		var tbl = document.createElement("table");
-		var row = document.createElement("tr");
-
-		for(var c = 0; c < cellsInRow; c++){
-			var cell = document.createElement("td");
-			var cellText = document.createTextNode(avgs[c]/totalRows);
-			cell.appendChild(cellText);
-			row.appendChild(cell);
-		}
-		tbl.appendChild(row);
-		div2.appendChild(tbl);
+		var avg = sum / intArray.length;
+		return avg;
 	}
 
 	//Graphing function. Currently draws a Line Graph hooked up to the webapp.
@@ -243,70 +313,10 @@
         });
  
         lineChart.render();
-
-        //Helper Function for filtering of data: on button press, will change the chart's data array to only include
-        //Selected data sets.
-        $("#filter").click(function() {
-        	while(chartDatArray.length > 0){
-        		chartDatArray.shift();
-        	}
-        	var filters = document.getElementsByClassName('filterCheckbox');	
-    		if(filters[0].checked){
-    			chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
-    		}
-    		if(filters[1].checked){
-    			chartDatArray.push({type:"line",name:"Nord",showInLegend:true,dataPoints:nordLine})
-    		}
-    		if(filters[2].checked){
-				chartDatArray.push({type:"line",name:"Olin 480",showInLegend:true,dataPoints:olin480Line})
-			}
-			if(filters[3].checked){
-				chartDatArray.push({type:"line",name:"Olin 208",showInLegend:true,dataPoints:olin208Line})
-			}
-			if(filters[4].checked){
-				chartDatArray.push({type:"line",name:"Rock 480",showInLegend:true,dataPoints:rock480Line})
-			}
-			if(filters[5].checked){
-				chartDatArray.push({type:"line",name:"Sears 480",showInLegend:true,dataPoints:sears480Line})
-			}
-			if(filters[6].checked){
-				chartDatArray.push({type:"line",name:"Sears 208",showInLegend:true,dataPoints:sears208Line})
-			}
-			if(filters[7].checked){
-				chartDatArray.push({type:"line",name:"Tomlinson",showInLegend:true,dataPoints:tomlinsonLine})
-			}
-			if(filters[8].checked){
-				chartDatArray.push({type:"line",name:"White",showInLegend:true,dataPoints:whiteLine})
-			}
-			if(filters[9].checked){
-				chartDatArray.push({type:"line",name:"Wick 208",showInLegend:true,dataPoints:wick208Line})
-			}
-			if(filters[10].checked){
-				chartDatArray.push({type:"line",name:"Wick 480",showInLegend:true,dataPoints:wick480Line})
-			}
-			if(filters[11].checked){
-				chartDatArray.push({type:"line",name:"Yost",showInLegend:true,dataPoints:yostLine})
-			}
-			if(filters[12].checked){
-				chartDatArray.push({type:"line",name:"Olin (Sum)",showInLegend:true,dataPoints:olinSumLine})
-			}
-			if(filters[13].checked){
-				chartDatArray.push({type:"line",name:"Sears (Sum)",showInLegend:true,dataPoints:searsSumLine})
-			}
-			if(filters[14].checked){
-				chartDatArray.push({type:"line",name:"Wick (Sum)",showInLegend:true,dataPoints:wickSumLine})
-			}
-    		lineChart.render();
-        })
 	}
 
 	//Populate the line data for our line plot.
 	function initializeLineData(){
-		console.log("test");
-		for(var i = 0; i < 5; i++){
-			console.log("test")
-		}
-		console.log(dateTimeArray.length)
 		for(var r = 0; r < dateTimeArray.length; r++){
 			glennanLine.push({y: glennanArray[r], label: dateTimeArray[r]})
 			nordLine.push({y: nordArray[r], label: dateTimeArray[r]})
@@ -342,77 +352,101 @@
 	}
     
     function pieChart() {
-        
-        //I am going to use averages for the pie chart -AD
-        var sum1 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum1 += parseInt(randArray[r][0], 10);
-		}
-        var avg1 = sum1/totalRows;
-        
-        var sum2 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum2 += parseInt(randArray[r][1], 10);
-		}
-        var avg2 = sum2/totalRows;
-        
-        var sum3 = 0;
-        for(var r = 0; r < totalRows; r++){
-            sum3 += parseInt(randArray[r][2], 10);
-        }
-        var avg3 = sum1/totalRows;
-        
-        var sum4 = 0;
-        for(var r = 0; r < totalRows; r++){
-            sum4 += parseInt(randArray[r][3], 10);
-        }
-        var avg4 = sum4/totalRows;
-        
-        var sum5 = 0;
-        for(var r = 0; r < totalRows; r++){
-			sum5 += parseInt(randArray[r][0], 10);
-		}
-        var avg5 = sum5/totalRows;
-        
-        
+        initializeAvgs()
         //Similar to the previous chart, but now is a pie chart instead
         //Also used div4 instead of div3
         //-AD
-        var pieChart = new CanvasJS.Chart("div4", {
-                                          legend: {
-                                          maxWidth: 350,
-                                          itemWidth: 120
-                                          },
-                                          
-                                          
-                                          data: [
-                                                 {
-                                                 //In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
-                                                 type: "pie",
-                                                 showInLegend: true,
-                                                 legendText: "{indexLabel}",
-                                                 dataPoints: [
-                                                              { y: avg1, indexLabel: "arc1"},
-                                                              { y: avg2, indexLabel: "arc2"},
-                                                              { y: avg3, indexLabel: "arc3"},
-                                                              { y: avg4, indexLabel: "arc4"},
-                                                              { y: avg5, indexLabel: "arc5"}
-                                                              ]
-                                                 }
-                                                 ]
-                                          });
-                                          //Named it differently to differentiate the two charts. -AD
-                                          pieChart.render();
-                                          
+        pieChart = new CanvasJS.Chart("div4", {
+        	legend: {
+        		maxWidth: 350,
+        		itemWidth: 120
+        	},
+        	data: [{
+        		//In the data points, trying to get the value from each datArray as each y-value in each arc. -AD
+                type: "pie",
+                showInLegend: true,
+                legendText: "{indexLabel}",
+                dataPoints: chartAvgArray
+             }]
+         });
+         //Named it differently to differentiate the two charts. -AD
+         pieChart.render();
+    }
+
+    //Populate the array for our pie chart with the averages of the data
+    function initializeAvgs(){
+    	glennanAvg = getAverage(glennanArray)
+    	nordAvg = getAverage(nordArray)
+    	olin480Avg = getAverage(olin480Array)
+    	olin208Avg = getAverage(olin208Array)
+    	rock480Avg = getAverage(rock480Array)
+    	sears480Avg = getAverage(sears480Array)
+    	sears208Avg = getAverage(sears208Array)
+    	tomlinsonAvg = getAverage(tomlinsonArray)
+    	whiteAvg = getAverage(whiteArray)
+    	wick208Avg = getAverage(wick208Array)
+    	wick480Avg = getAverage(wick480Array)
+    	yostAvg = getAverage(yostArray)
+    	olinSumAvg = getAverage(olinSumArray)
+    	searsSumAvg = getAverage(searsSumArray)
+    	wickSumAvg = getAverage(wickSumArray)
+
+		chartAvgArray.push({ y: glennanAvg, indexLabel: "Glennan"})
+		chartAvgArray.push({ y: nordAvg, indexLabel: "Nord"})
+		chartAvgArray.push({ y: olin480Avg, indexLabel: "Olin 408"})
+		chartAvgArray.push({ y: olin208Avg, indexLabel: "Olin 208"})
+		chartAvgArray.push({ y: rock480Avg, indexLabel: "Rock 480"})
+		chartAvgArray.push({ y: sears480Avg, indexLabel: "Sears 480"})
+		chartAvgArray.push({ y: sears208Avg, indexLabel: "Sears 208"})
+		chartAvgArray.push({ y: tomlinsonAvg, indexLabel: "Tomlinson"})
+		chartAvgArray.push({ y: whiteAvg, indexLabel: "White"})
+		chartAvgArray.push({ y: wick208Avg, indexLabel: "Wick 208"})
+		chartAvgArray.push({ y: wick480Avg, indexLabel: "Wick 480"})
+		chartAvgArray.push({ y: yostAvg, indexLabel: "Yost"})
+		chartAvgArray.push({ y: olinSumAvg, indexLabel: "Olin (Sum)"})
+		chartAvgArray.push({ y: searsSumAvg, indexLabel: "Sears (Sum)"})
+		chartAvgArray.push({ y: wickSumAvg, indexLabel: "Wick (Sum)"})
+    }
+
+    function columnGraph() {
+        initializeCurrents()
+        //Similar to the previous chart, but now is a bar graph instead
+        //Also used div5 instead of div4
+        //-AD
+        columnGraph = new CanvasJS.Chart("div5", {
+        	legend: {
+        		maxWidth: 350,
+        		itemWidth: 120
+        	},
+        	data: [{type: "column",
+        		dataPoints: chartCurrentArray
+        	}]
+        });
+        columnGraph.render();                           
+    }
+
+    function initializeCurrents(){
+    	var lastIndex = dateTimeArray.length - 1;
+
+    	chartCurrentArray.push({ y: glennanArray[lastIndex], indexLabel: "Glennan"})
+    	chartCurrentArray.push({ y: nordArray[lastIndex], indexLabel: "Nord"})
+    	chartCurrentArray.push({ y: olin480Array[lastIndex], indexLabel: "Olin 480"})
+    	chartCurrentArray.push({ y: olin208Array[lastIndex], indexLabel: "Olin 208"})
+    	chartCurrentArray.push({ y: rock480Array[lastIndex], indexLabel: "Rock 480"})
+    	chartCurrentArray.push({ y: sears480Array[lastIndex], indexLabel: "Sears 480"})
+    	chartCurrentArray.push({ y: sears208Array[lastIndex], indexLabel: "Sears 208"})
+    	chartCurrentArray.push({ y: tomlinsonArray[lastIndex], indexLabel: "Tomlinson"})
+    	chartCurrentArray.push({ y: whiteArray[lastIndex], indexLabel: "White"})
+    	chartCurrentArray.push({ y: wick208Array[lastIndex], indexLabel: "Wick 208"})
+    	chartCurrentArray.push({ y: wick480Array[lastIndex], indexLabel: "Wick 480"})
+    	chartCurrentArray.push({ y: yostArray[lastIndex], indexLabel: "Yost"})
+    	chartCurrentArray.push({ y: olinSumArray[lastIndex], indexLabel: "Olin (Sum)"})
+    	chartCurrentArray.push({ y: searsSumArray[lastIndex], indexLabel: "Sears (Sum)"})
+    	chartCurrentArray.push({ y: wickSumArray[lastIndex], indexLabel: "Wick (Sum)"})
     }
     
 	function drawAll(){
 		this.getSQL();
-		this.drawTable();
-		this.drawAverages();
-		//this.drawChart();
-        this.pieChart();
-		//this.drawCSV();
 	}
 
 window.onload=drawAll; 
