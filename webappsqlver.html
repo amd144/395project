@@ -50,17 +50,15 @@
         	<button id="filter" onclick="filterGraphData()">Filter Results</button>
         </div>
     </div>
-
-	<div id="viz"></div>
-	<div id="div1"></div>
-	<div id="div2"></div>
     
     <script>
 
+    //Variables for the canvasjs charts we use, so that they can be updated from any function.
     var lineChart;
     var pieChart;
     var columnGraph;
 
+    //Arrays to store the values we receive from the SQL server.
     var dateTimeArray = [];
     var glennanArray= [];
     var nordArray = [];
@@ -78,6 +76,7 @@
     var searsSumArray = [];
     var wickSumArray = [];
 
+    //Arrays to store the line data for each chart in its proper format.
     var chartDatArray = [];
     	var glennanLine = [];
     	var nordLine = [];
@@ -95,6 +94,7 @@
     	var searsSumLine = [];
     	var wickSumLine = [];
 
+    //Averages for each sensor's data. Used by the Pie chart.
     var chartAvgArray = [];
     	var glennanAvg = 0;
     	var nordAvg = 0;
@@ -113,52 +113,30 @@
     	var wickSumAvg = 0;
 
     var chartCurrentArray = [];
-        
-	//Note: Currently CSV drawing via d3 does not appear to be functional on some browsers
-	//(tested with Chrome, IE, Edge, Firefox. Only worked with Firefox)
-	//Thus, may need to eventually change lookup method.
-	//But, the CSV is for testing at the moment so this is not strictly necessary.
-	function drawCSV(){
-		//Using week1monnoteless instead of the full 2 weeks to avoid crashing firefox.
-		d3.text("week1monnoteless.csv", function(datasetText) {
-			var parsedCSV = d3.csv.parseRows(datasetText);
-		
-			var sampleHTML = d3.select("#viz")
-				.append("table")
-				.style("border-collapse", "collapse")
-				.style("border", "2px black solid")
-			
-				.selectAll("tr")
-				.data(parsedCSV)
-				.enter().append("tr")
-			
-				.selectAll("td")
-				.data(function(d) {return d;})
-				.enter().append("td")
-				.style("border", "1px black solid")
-				.style("padding", "5px")
-				.on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")})
-				.on("mouseover", function(){d3.select(this).style("background-color", "white")})
-				.text(function(d){return d;})
-				.style("font-size", "12px");
-		});
-	}
 
+    var filtered = false;
+
+    //The current line we are on in the SQL. used for testing with my homemade database.
+    //You should not need this once you hook it up to the live server and edit getsqlline to call the most recent line.
+    var currentline = 60;
+
+
+    //Sets the repeating function that causes the page to grab a new line from the database.
+    var secondsBetweenUpdate = 3;
+    var updateInterval = setInterval(function(){ grabNewLine() }, secondsBetweenUpdate * 1000);
+    //The function currently does not clear, and as this will be hooked up to a live feed there should be no need to make it.
+    //If, however, you do need to end the autoupdate, use clearInterval(updateInterval)
+        
+	
+    //Code to filter unwanted sensors out of our graphs. Called when the "Filter Results" button is pressed.
 	function filterGraphData(){
-		//blah
-		while(chartDatArray.length > 0){
-        	chartDatArray.shift();
-        }
-        while(chartAvgArray.length > 0){
-        	chartAvgArray.shift();
-        }
-        while(chartCurrentArray.length > 0){
-        	chartCurrentArray.shift();
-        }
+		filtered = true;	//Set the filtered variable to true, so the update method knows that the user is filtering their desired data.
+		clearAllArrays();	//Clears all graph arrays, so we can fill them with only the desired sensors.
 
     	var lastIndex = dateTimeArray.length - 1;
 
-        var filters = document.getElementsByClassName('filterCheckbox');	
+        var filters = document.getElementsByClassName('filterCheckbox');	//Finds the status of each filter checkbox.
+        //Go through each filter, and add the appropriate data to the arrays if the sensor is enabled.
     	if(filters[0].checked){
     		chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
     		chartAvgArray.push({ y: glennanAvg, indexLabel: "Glennan"})
@@ -234,12 +212,12 @@
 			chartAvgArray.push({ y: wickSumAvg, indexLabel: "Wick (Sum)"})
 	    	chartCurrentArray.push({ y: wickSumArray[lastIndex], indexLabel: "Wick (Sum)"})
 		}
-    	lineChart.render();
-    	pieChart.render();
-    	columnGraph.render();
+		//Redraw our charts so they display the proper, newly-filtered, data.
+    	renderAllCharts();
 
 	}
 
+	//Calls getdata.php to grab the initial data.
 	function getSQL(){
 		if(window.XMLHttpRequest){
 			xmlhttp = new XMLHttpRequest();
@@ -251,10 +229,32 @@
 				var received = trimResponse(xmlhttp.responseText);
 				var obj = JSON.parse(received);
 				var resultArray = obj.sensordata;
-				parseResults(obj.sensordata);
+				parseResults(resultArray);
 			}
 		};
 		xmlhttp.open("GET","getdata.php",true);
+		xmlhttp.send();
+	}
+
+	//Grabs a single new line of data.
+	function grabNewLine(){
+		if(window.XMLHttpRequest){
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange = function(){
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
+				currentline += 1;	//Increment currentline so that we keep progressing through the SQL.
+				var received = trimResponse(xmlhttp.responseText);
+				var obj = JSON.parse(received);
+				var result = obj.sensordata[0];
+				parseNewLine(result);
+			}
+		};
+		var baseget = "getsqlline.php?line=";
+		var finalget = baseget.concat(currentline);
+		xmlhttp.open("GET", finalget ,true);
 		xmlhttp.send();
 	}
 
@@ -290,23 +290,67 @@
 			wickSumArray.push(parseInt(resultArray[i].Wick_Sum));
 		}
 
-		this.drawChart();	//now that the JSON data has been parsed, the arrays are populated and we can run our Chart setup.
+		//now that the JSON data has been parsed, the arrays are populated and we can run our Chart setup.
+		this.drawChart();
 		this.pieChart();
 		this.columnGraph();
 	}
 
+	//Parse our new line of data.
+	function parseNewLine(result){
+		dateTimeArray.push(result.Date_Time);
+		glennanArray.push(parseInt(result.Glennan));
+		nordArray.push(parseInt(result.Nord));
+		olin480Array.push(parseInt(result.Olin_480));
+		olin208Array.push(parseInt(result.Olin_208));
+		rock480Array.push(parseInt(result.Rock_480));
+		sears480Array.push(parseInt(result.Sears_480));
+		sears208Array.push(parseInt(result.Sears_208));
+		tomlinsonArray.push(parseInt(result.Tomlinson));
+		whiteArray.push(parseInt(result.White));
+		wick208Array.push(parseInt(result.Wick_208));
+		wick480Array.push(parseInt(result.Wick_480));
+		yostArray.push(parseInt(result.Yost));
+		olinSumArray.push(parseInt(result.Olin_Sum));
+		searsSumArray.push(parseInt(result.Sears_Sum));
+		wickSumArray.push(parseInt(result.Wick_Sum));
+
+		//Update all of our charts to include the new data
+		this.updateAll();
+	}
+
+	//Helper function to handle updating all charts.
+	function updateAll(){
+		updateLineData();	//Updates the individual arrays of line chart data.
+		getAllAvgs();		//Updates the individual average variables
+		//If a filter is in place, filterGraphData already handles rerendering the graphs.
+		if(filtered){
+			filterGraphData();
+		}
+		//Otherwise, we do the steps to rerender the graphs.
+		else{
+			clearAllArrays();
+			updateAllArrays();
+			renderAllCharts();
+		}
+	}
+
+	//Find the average value in an array.
 	function getAverage(intArray){
 		var sum = 0;
 		for(var i = 0; i < intArray.length; i++){
-			sum += intArray[i];
+			if(!isNaN(intArray[i])){
+				sum += intArray[i];
+			}
 		}
 		var avg = sum / intArray.length;
 		return avg;
 	}
 
-	//Graphing function. Currently draws a Line Graph hooked up to the webapp.
+	//Graphing function for the line chart.
 	function drawChart(){
 		initializeLineData()
+		updateLineArray()
 
 		lineChart = new CanvasJS.Chart("div3", {
               data: chartDatArray
@@ -318,22 +362,99 @@
 	//Populate the line data for our line plot.
 	function initializeLineData(){
 		for(var r = 0; r < dateTimeArray.length; r++){
-			glennanLine.push({y: glennanArray[r], label: dateTimeArray[r]})
-			nordLine.push({y: nordArray[r], label: dateTimeArray[r]})
-			olin480Line.push({y: olin480Array[r], label: dateTimeArray[r]})
-			olin208Line.push({y: olin208Array[r], label: dateTimeArray[r]})
-			rock480Line.push({y: rock480Array[r], label: dateTimeArray[r]})
-			sears480Line.push({y: sears480Array[r], label: dateTimeArray[r]})
-			sears208Line.push({y: sears208Array[r], label: dateTimeArray[r]})
-			tomlinsonLine.push({y: tomlinsonArray[r], label: dateTimeArray[r]})
-			whiteLine.push({y: whiteArray[r], label: dateTimeArray[r]})
-			wick208Line.push({y: wick208Array[r], label: dateTimeArray[r]})
-			wick480Line.push({y: wick480Array[r], label: dateTimeArray[r]})
-			yostLine.push({y: yostArray[r], label: dateTimeArray[r]})
-			olinSumLine.push({y: olinSumArray[r], label: dateTimeArray[r]})
-			searsSumLine.push({y: searsSumArray[r], label: dateTimeArray[r]})
-			wickSumLine.push({y: wickSumArray[r], label: dateTimeArray[r]})
+			glennanLine.push({x: r, y: glennanArray[r], label: dateTimeArray[r]})
+			nordLine.push({x: r, y: nordArray[r], label: dateTimeArray[r]})
+			olin480Line.push({x: r, y: olin480Array[r], label: dateTimeArray[r]})
+			olin208Line.push({x: r, y: olin208Array[r], label: dateTimeArray[r]})
+			rock480Line.push({x: r, y: rock480Array[r], label: dateTimeArray[r]})
+			sears480Line.push({x: r, y: sears480Array[r], label: dateTimeArray[r]})
+			sears208Line.push({x: r, y: sears208Array[r], label: dateTimeArray[r]})
+			tomlinsonLine.push({x: r, y: tomlinsonArray[r], label: dateTimeArray[r]})
+			whiteLine.push({x: r, y: whiteArray[r], label: dateTimeArray[r]})
+			wick208Line.push({x: r, y: wick208Array[r], label: dateTimeArray[r]})
+			wick480Line.push({x: r, y: wick480Array[r], label: dateTimeArray[r]})
+			yostLine.push({x: r, y: yostArray[r], label: dateTimeArray[r]})
+			olinSumLine.push({x: r, y: olinSumArray[r], label: dateTimeArray[r]})
+			searsSumLine.push({x: r, y: searsSumArray[r], label: dateTimeArray[r]})
+			wickSumLine.push({x: r, y: wickSumArray[r], label: dateTimeArray[r]})
 		}
+	}
+
+	//Adds a new data point to our line chart.
+	function updateLineData(){
+		var r = (dateTimeArray.length - 1);
+		glennanLine.push({x: r, y: glennanArray[r], label: dateTimeArray[r]})
+		nordLine.push({x: r, y: nordArray[r], label: dateTimeArray[r]})
+		olin480Line.push({x: r, y: olin480Array[r], label: dateTimeArray[r]})
+		olin208Line.push({x: r, y: olin208Array[r], label: dateTimeArray[r]})
+		rock480Line.push({x: r, y: rock480Array[r], label: dateTimeArray[r]})
+		sears480Line.push({x: r, y: sears480Array[r], label: dateTimeArray[r]})
+		sears208Line.push({x: r, y: sears208Array[r], label: dateTimeArray[r]})
+		tomlinsonLine.push({x: r, y: tomlinsonArray[r], label: dateTimeArray[r]})
+		whiteLine.push({x: r, y: whiteArray[r], label: dateTimeArray[r]})
+		wick208Line.push({x: r, y: wick208Array[r], label: dateTimeArray[r]})
+		wick480Line.push({x: r, y: wick480Array[r], label: dateTimeArray[r]})
+		yostLine.push({x: r, y: yostArray[r], label: dateTimeArray[r]})
+		olinSumLine.push({x: r, y: olinSumArray[r], label: dateTimeArray[r]})
+		searsSumLine.push({x: r, y: searsSumArray[r], label: dateTimeArray[r]})
+		wickSumLine.push({x: r, y: wickSumArray[r], label: dateTimeArray[r]})
+
+		trimLines()		//If you want the line chart to gain data points over time, remove this.
+	}
+
+	//Trim the line arrays to a desired length, to make the plot stay at a constant resolution of data.
+	function trimLines(){
+		var desiredLength = 60;
+		if(glennanLine.length > desiredLength){
+			glennanLine.shift();
+		}
+		if(nordLine.length > desiredLength){
+			nordLine.shift();
+		}
+		if(olin480Line.length > desiredLength){
+			olin480Line.shift();
+		}
+		if(olin208Line.length > desiredLength){
+			olin208Line.shift();
+		}
+		if(rock480Line.length > desiredLength){
+			rock480Line.shift();
+		}
+		if(sears480Line.length > desiredLength){
+			sears480Line.shift();
+		}
+		if(sears208Line.length > desiredLength){
+			sears208Line.shift();
+		}
+		if(tomlinsonLine.length > desiredLength){
+			tomlinsonLine.shift();
+		}
+		if(whiteLine.length > desiredLength){
+			whiteLine.shift();
+		}
+		if(wick208Line.length > desiredLength){
+			wick208Line.shift();
+		}
+		if(wick480Line.length > desiredLength){
+			wick480Line.shift();
+		}
+		if(yostLine.length > desiredLength){
+			yostLine.shift();
+		}
+		if(olinSumLine.length > desiredLength){
+			olinSumLine.shift();
+		}
+		if(searsSumLine.length > desiredLength){
+			searsSumLine.shift();
+		}
+		if(wickSumLine.length > desiredLength){
+			wickSumLine.shift();
+		}
+	}
+
+	//Push all individual line arrays into the data array for our line plot.
+	//This should only be called when a filter is not active - filterGraphData does this job.
+	function updateLineArray(){
 		chartDatArray.push({type:"line",name:"Glennan",showInLegend:true,dataPoints:glennanLine})
 		chartDatArray.push({type:"line",name:"Nord",showInLegend:true,dataPoints:nordLine})
 		chartDatArray.push({type:"line",name:"Olin 480",showInLegend:true,dataPoints:olin480Line})
@@ -350,9 +471,17 @@
 		chartDatArray.push({type:"line",name:"Sears (Sum)",showInLegend:true,dataPoints:searsSumLine})
 		chartDatArray.push({type:"line",name:"Wick (Sum)",showInLegend:true,dataPoints:wickSumLine})
 	}
+
+	//Remove all data from the line plot's data array.
+	function clearLineArray(){
+		while(chartDatArray.length > 0){
+        	chartDatArray.shift();
+        }
+	}
     
     function pieChart() {
-        initializeAvgs()
+        getAllAvgs()
+        updateAvgArray()
         //Similar to the previous chart, but now is a pie chart instead
         //Also used div4 instead of div3
         //-AD
@@ -374,7 +503,7 @@
     }
 
     //Populate the array for our pie chart with the averages of the data
-    function initializeAvgs(){
+    function getAllAvgs(){
     	glennanAvg = getAverage(glennanArray)
     	nordAvg = getAverage(nordArray)
     	olin480Avg = getAverage(olin480Array)
@@ -390,8 +519,12 @@
     	olinSumAvg = getAverage(olinSumArray)
     	searsSumAvg = getAverage(searsSumArray)
     	wickSumAvg = getAverage(wickSumArray)
+    }
 
-		chartAvgArray.push({ y: glennanAvg, indexLabel: "Glennan"})
+    //Push all individual averages into the data array for our pie chart.
+	//This should only be called when a filter is not active - filterGraphData does this job.
+    function updateAvgArray(){
+    	chartAvgArray.push({ y: glennanAvg, indexLabel: "Glennan"})
 		chartAvgArray.push({ y: nordAvg, indexLabel: "Nord"})
 		chartAvgArray.push({ y: olin480Avg, indexLabel: "Olin 408"})
 		chartAvgArray.push({ y: olin208Avg, indexLabel: "Olin 208"})
@@ -408,8 +541,15 @@
 		chartAvgArray.push({ y: wickSumAvg, indexLabel: "Wick (Sum)"})
     }
 
+    //Remove all data from our pie chart's data array.
+    function clearAvgArray(){
+    	while(chartAvgArray.length > 0){
+        	chartAvgArray.shift();
+        }
+    }
+
     function columnGraph() {
-        initializeCurrents()
+        updateCurrentArray()
         //Similar to the previous chart, but now is a bar graph instead
         //Also used div5 instead of div4
         //-AD
@@ -425,7 +565,9 @@
         columnGraph.render();                           
     }
 
-    function initializeCurrents(){
+    //Find the most recent entries in each sensor's array, and push them into our column graph's data array.
+	//This should only be called when a filter is not active - filterGraphData does this job.
+    function updateCurrentArray(){
     	var lastIndex = dateTimeArray.length - 1;
 
     	chartCurrentArray.push({ y: glennanArray[lastIndex], indexLabel: "Glennan"})
@@ -444,7 +586,37 @@
     	chartCurrentArray.push({ y: searsSumArray[lastIndex], indexLabel: "Sears (Sum)"})
     	chartCurrentArray.push({ y: wickSumArray[lastIndex], indexLabel: "Wick (Sum)"})
     }
+
+    //Remove all data from our column graph's data array.
+    function clearCurrentArray(){
+    	while(chartCurrentArray.length > 0){
+        	chartCurrentArray.shift();
+        }
+    }
+
+    //Clear all of our graphs' data arrays.
+    function clearAllArrays(){
+    	clearLineArray();
+    	clearAvgArray();
+    	clearCurrentArray();
+    }
+
+    //Update the data in alll of our graphs' data arrays.
+    function updateAllArrays(){
+    	updateLineArray();
+    	updateAvgArray();
+    	updateCurrentArray();
+    }
+
+    //Draw all of our charts.
+    function renderAllCharts(){
+    	lineChart.render();
+    	pieChart.render();
+    	columnGraph.render();
+    }
     
+    //This only calls getSQL at the moment. If you want to draw other things with Javascript on this page,
+    //Add the relevant code here.
 	function drawAll(){
 		this.getSQL();
 	}
