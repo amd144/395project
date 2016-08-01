@@ -5,7 +5,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "root";
 $dbname = "sensors";
 
 // Create connection
@@ -15,7 +15,7 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-$sql = "SELECT * FROM sensors.sensordata2 LIMIT 60";
+$sql = "SELECT * FROM sensors.sensordata";
 $result = mysqli_query($conn, $sql);
 
 $sensorinfo = array();

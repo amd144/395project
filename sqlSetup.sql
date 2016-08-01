@@ -28,9 +28,4 @@ CREATE TABLE sensordata (
 
 
 /* MySQL server by default runs with --secure-file-priv, only allowing user to use files in the Uploads directory. */
-LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/smallsample.csv'
-INTO TABLE sensordata
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS;
+LOAD DATA INFILE '/Applications/MAMP/htdocs/395project-masterv4/csv-files/week1frinoteless.csv’ INTO TABLE sensordata FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY ‘\r’ IGNORE 1 ROWS;
